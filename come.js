@@ -32,7 +32,7 @@ registerPlugin({ // jshint ignore:line
 	} else {
 
 		log("SIDs not valid...");
-		sids = new Array();
+		sids = [];
 	}
 
 	if (config.ids) {
@@ -40,7 +40,7 @@ registerPlugin({ // jshint ignore:line
 		uids = config.ids.split(',');
 	} else {
 		log("UIDs not valid...");
-		uids = new Array();
+		uids = [];
 	}
 
 
