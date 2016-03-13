@@ -1,0 +1,9 @@
+before_script:
+
+stages:
+ - test
+ 
+jshint-test:
+  stage: test
+  script:
+    - jshint .; if [ $? -ne 0 ]; then exit 66; fi;
