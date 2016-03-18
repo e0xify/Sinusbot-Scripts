@@ -2,8 +2,15 @@ before_script:
 
 stages:
  - test
+ - deploy
  
 jshint-test:
   stage: test
   script:
     - jshint .; if [ $? -ne 0 ]; then exit 66; fi;
+    
+deploy:
+  stage: deploy
+  script:
+  - if [ `git remote | grep 'github'` == "github" ]; then echo "Repository exists."; else echo "Repository not exists"; git remote add github git@github.com:Xuxe/Sinusbot-Scripts.git;  fi;
+  - git push -u github master
