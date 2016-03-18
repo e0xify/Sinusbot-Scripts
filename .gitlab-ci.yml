@@ -12,5 +12,5 @@ jshint-test:
 deploy:
   stage: deploy
   script:
-  - if [ `git remote | grep 'github'` == "github" ]; then echo "Repository exists."; else echo "Repository not exists"; git remote add github git@github.com:Xuxe/Sinusbot-Scripts.git;  fi;
+  - if [ `git remote | grep 'github'` == "github" ]; then echo "Repository exists."; else $(git remote add github git@github.com:Xuxe/Sinusbot-Scripts.git);  fi;
   - git push -u github master
