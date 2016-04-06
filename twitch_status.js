@@ -98,32 +98,34 @@ registerPlugin({ // jshint ignore:line
 
 
 			function ProcessTwitchResponse(error, response) {
-				for (i = 0; i < twitchuser.length; i++) {
-				sinusbot.log("User Nr: " +i + " current Username: " + twitchuser[i]);
+				
 				LastResponse = response;
 				if (response.statusCode != 200) {
 					sinusbot.log(error);
 					return;
 				}
 				UseUpdatesTwitch(JSON.parse(response.data));
-				}
+				
 			}
 
 			function UseUpdatesTwitch(data) {
 				if (data.stream === null) {
 					cname = config.offline_txt.replace('%n', config.name);
 					sinusbot.log(twitchuser[i] + " is offline");
-					channelUpdate(config.cid, {
-						"name": cname,
-						"description": ""
-					});
+					if (config.output == 0) {
+					sinusbot.log("No channel set."); 
+					sinusbot.chatServer("Twitch Status: " + twitchuser[i] + " is now offline.");
+					} else {
+					sinusbot.chatChannel("Twitch Status: " + twitchuser[i] + " is now offline.");
+				}
 				} else {
 					cname = config.online_txt.replace('%n', config.name).replace('%g', data.stream.game);
 					sinusbot.log(twitchuser[i] + " is online");
-					channelUpdate(config.cid, {
-						"name": cname,
-						"description": ""
-					});
+					if (config.output == 0) {
+					sinusbot.chatServer("Twitch Status: " + twitchuser[i] + " is now online!");
+					} else {
+					sinusbot.chatChannel("Twitch Status: " + twitchuser[i] + " is now online.");
+					}
 				}
 			}
 
@@ -135,11 +137,14 @@ registerPlugin({ // jshint ignore:line
 				
 
 
-			setInterval(RunTwitch, 60000 * config.interval);
+			setInterval(RunTwitch, 30000 * config.interval);
 
 			sinusbot.on('api:twitch', function(ev) {
+				for (i = 0; i < twitchuser.length; i++) {
+				sinusbot.log("User Nr: " +i + " current Username: " + twitchuser[i]);
 				sinusbot.http(http_opts, ProcessTwitchResponse);
 				return 'Called.';
+				}
 			});
 			RunTwitch();
 
