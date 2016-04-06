@@ -1,5 +1,5 @@
 registerPlugin({ // jshint ignore:line
-	name: 'Twitch/Hitbox Status!',
+	name: 'Twitch/Hitbox Status! v2',
 	version: '1.2',
 	description: 'Check periodicly your favorit streamers status!',
 	author: 'Julian Huebenthal (Xuxe) <julian@julian-huebenthal.de>',
@@ -13,8 +13,16 @@ registerPlugin({ // jshint ignore:line
 			]
 		},
 		name: {
-			title: 'Streamer Name:',
+			title: 'Streamer Name: (seperated by comma)',
 			type: 'string',
+		},
+		output: {
+			title: 'global channel',
+			type: 'select',
+			options: [
+				"yes",
+				"no",
+			]
 		},
 		cid: {
 			title: 'Channel for Status Update:',
@@ -37,12 +45,13 @@ registerPlugin({ // jshint ignore:line
 			placeholder: '%n (%g) is online!',
 			value: '%n is online!',
 		},
-
 	}
 }, function(sinusbot, config, pluginInfo) {
 	var LastResponse;
 	var cname;
-
+	var twitchuser = config.name.split(',');
+	var i = 0;
+    
 	if (typeof config.cid === undefined) {
 		sinusbot.log("No channel set.");
 		return;
@@ -73,37 +82,44 @@ registerPlugin({ // jshint ignore:line
 
 	switch (config.type) {
 
-		case 0:
-
+		case 0:	
 			http_opts = {
 				"method": "GET",
-				"url": "https://api.twitch.tv/kraken/streams/" + config.name,
+				"url": "https://api.twitch.tv/kraken/streams/" + twitchuser[i],
 				"timeout": 60000,
 				"headers": [{
 					"Content-Type": "application/json"
 				}, {
-					"Accept": "application/vnd.twitchtv.v3+json"
+				 	"Accept": "application/vnd.twitchtv.v3+json"
 				}]
 			};
+			
+		
+
 
 			function ProcessTwitchResponse(error, response) {
+				for (i = 0; i < twitchuser.length; i++) {
+				sinusbot.log("User Nr: " +i + " current Username: " + twitchuser[i]);
 				LastResponse = response;
 				if (response.statusCode != 200) {
 					sinusbot.log(error);
 					return;
 				}
 				UseUpdatesTwitch(JSON.parse(response.data));
+				}
 			}
 
 			function UseUpdatesTwitch(data) {
 				if (data.stream === null) {
 					cname = config.offline_txt.replace('%n', config.name);
+					sinusbot.log(twitchuser[i] + " is offline");
 					channelUpdate(config.cid, {
 						"name": cname,
 						"description": ""
 					});
 				} else {
 					cname = config.online_txt.replace('%n', config.name).replace('%g', data.stream.game);
+					sinusbot.log(twitchuser[i] + " is online");
 					channelUpdate(config.cid, {
 						"name": cname,
 						"description": ""
@@ -115,7 +131,9 @@ registerPlugin({ // jshint ignore:line
 			function RunTwitch() {
 				sinusbot.http(http_opts, ProcessTwitchResponse);
 				sinusbot.log("[T] Run() triggered \n");
-			}
+				}
+				
+
 
 			setInterval(RunTwitch, 60000 * config.interval);
 
@@ -171,7 +189,6 @@ registerPlugin({ // jshint ignore:line
 			}
 
 			setInterval(RunHitbox, 60000 * config.interval);
-
 			sinusbot.on('api:hitbox', function(ev) {
 				sinusbot.http(http_opts, ProcessHitBoxResponse);
 				return 'Called.';
